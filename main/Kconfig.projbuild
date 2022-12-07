@@ -1,0 +1,8 @@
+menu "Lock Controller Configuration"
+    config KEY_STORAGE_SIZE
+        int "Key storage size"
+        range 0 1000
+        default 128
+        help
+            Maximum amount of unlock keys stored in memory
+endmenu
