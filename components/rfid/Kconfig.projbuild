@@ -1,0 +1,21 @@
+menu "RFID configuration"
+    config SPI_MOSI_PIN
+        int "SPI MOSI pin"
+        range 0 34
+        default 19
+        
+    config SPI_MISO_PIN
+        int "SPI MISO pin"
+        range 0 34
+        default 21
+    
+    config SPI_SDA_PIN
+        int "SPI SDA pin"
+        range 0 34
+        default 5
+    
+    config SPI_SCK_PIN
+        int "SPI SDK pin"
+        range 0 34
+        default 18
+endmenu
