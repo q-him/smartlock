@@ -7,6 +7,7 @@
 #include "sdkconfig.h"
 #include "lock_controller.h"
 #include "lcd.h"
+#include "rfid.h"
 
 static const char* TAG = "main";
 
@@ -16,6 +17,7 @@ void app_main(void)
 
     start_lock_controller();
     start_lcd_task();
+    start_rfid_task();
 
     while (true) {
         LkcDataId_t id = i % 4;
@@ -27,8 +29,8 @@ void app_main(void)
 
         LcdMessage_t lcd_msg = i % 4;
 
-        xQueueSend(lkc_input, &message, 0);
-        xQueueSend(lcd_queue, &lcd_msg, 0);
+        // xQueueSend(lkc_input, &message, 0);
+        // xQueueSend(lcd_queue, &lcd_msg, 0);
 
         vTaskDelay(pdMS_TO_TICKS(5000));
         i++;
