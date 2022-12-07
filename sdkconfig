@@ -133,10 +133,10 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# Lock Controller Configuration
+# Smartlock configuration
 #
 CONFIG_KEY_STORAGE_SIZE=128
-# end of Lock Controller Configuration
+# end of Smartlock configuration
 
 #
 # Compiler options

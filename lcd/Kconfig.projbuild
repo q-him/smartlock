@@ -1,0 +1,15 @@
+menu "LCD configuration"
+    config I2C_SDA_PIN
+        int "I2C SDA pin"
+        range 0 34
+        default 18
+        
+    config I2C_SCL_PIN
+        int "I2C SCL pin"
+        range 0 34
+        default 19
+            
+    config LCD_I2C_ADDR
+        hex "LCD I2C address"
+        default 0x3F
+endmenu
