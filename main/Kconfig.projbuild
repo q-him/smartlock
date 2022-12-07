@@ -1,4 +1,4 @@
-menu "Lock Controller Configuration"
+menu "Smartlock configuration"
     config KEY_STORAGE_SIZE
         int "Key storage size"
         range 0 1000
