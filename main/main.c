@@ -20,13 +20,15 @@ void app_main(void)
     while (true) {
         LkcDataId_t id = i % 4;
 
-
         LkcMsg_t message = {
             .id = id,
             .data = i
         };
 
+        LcdMessage_t lcd_msg = i % 4;
+
         xQueueSend(lkc_input, &message, 0);
+        xQueueSend(lcd_queue, &lcd_msg, 0);
 
         vTaskDelay(pdMS_TO_TICKS(5000));
         i++;

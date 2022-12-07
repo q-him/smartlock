@@ -25,4 +25,13 @@
 #define I2C_MASTER_SDA_IO        CONFIG_I2C_SDA_PIN
 #define I2C_MASTER_SCL_IO        CONFIG_I2C_SCL_PIN
 
+typedef enum {
+    LCD_SHOW_OPEN,
+    LCD_SHOW_CLOSED,
+    LCD_SHOW_ERROR,
+    LCD_SHOW_REGISTERING
+} LcdMessage_t;
+
+extern QueueHandle_t lcd_queue;
+
 void start_lcd_task();

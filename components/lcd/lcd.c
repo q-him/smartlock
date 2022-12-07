@@ -1,14 +1,23 @@
 #include "./include/lcd.h"
 
-void lcd_task(void* param);
-void init_i2c_master();
+QueueHandle_t lcd_queue;
+
+static i2c_lcd1602_info_t* lcd_info;
+
+static void lcd_task(void* param);
+static void init_i2c_master();
+static void show_message();
+static void show_open();
+static void show_closed();
+static void show_error();
 
 void start_lcd_task()
 {
+    lcd_queue = xQueueCreate(8, sizeof(LcdMessage_t));
     xTaskCreate(lcd_task, LCD_TAG, 16384, NULL, 1, NULL);
 }
 
-void lcd_task(void* param)
+static void lcd_task(void* param)
 {
     // Set up I2C
     init_i2c_master();
@@ -21,7 +30,7 @@ void lcd_task(void* param)
     ESP_ERROR_CHECK(smbus_set_timeout(smbus_info, 1000 / portTICK_RATE_MS));
 
     // Set up the LCD1602 device with backlight off
-    i2c_lcd1602_info_t * lcd_info = i2c_lcd1602_malloc();
+    lcd_info = i2c_lcd1602_malloc();
     ESP_ERROR_CHECK(i2c_lcd1602_init(lcd_info, smbus_info, true,
                                      LCD_NUM_ROWS, LCD_NUM_COLUMNS, LCD_NUM_VISIBLE_COLUMNS));
 
@@ -29,33 +38,43 @@ void lcd_task(void* param)
 
     ESP_LOGI(LCD_TAG, "backlight on");
     i2c_lcd1602_set_backlight(lcd_info, true);
-    
-    ESP_LOGI(LCD_TAG, "cursor on");
-    i2c_lcd1602_set_cursor(lcd_info, true);
-
-    ESP_LOGI(LCD_TAG, "display A at 0,0");
-    i2c_lcd1602_move_cursor(lcd_info, 0, 0);
-    i2c_lcd1602_write_char(lcd_info, 'A');
-
-    ESP_LOGI(LCD_TAG, "display B at 8,0");
-    i2c_lcd1602_move_cursor(lcd_info, 8, 0);
-    i2c_lcd1602_write_char(lcd_info, 'B');
-
-    ESP_LOGI(LCD_TAG, "display C at 15,1");
-    i2c_lcd1602_move_cursor(lcd_info, 15, 1);
-    i2c_lcd1602_write_char(lcd_info, 'C');
 
     ESP_LOGI(LCD_TAG, "move to 0,1 and blink");  // cursor should still be on
     i2c_lcd1602_move_cursor(lcd_info, 0, 1);
     i2c_lcd1602_set_blink(lcd_info, true);
 
+    LcdMessage_t message;
+
     while (1)
     {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        xQueueReceive(lcd_queue, (void*)(&message), portMAX_DELAY);
+
+        switch (message)
+        {
+        case LCD_SHOW_OPEN:
+            show_message("Open");
+            break;
+        case LCD_SHOW_CLOSED:
+            show_message("Closed");
+            break;
+        case LCD_SHOW_ERROR:
+            show_message("Error");
+            break;
+        case LCD_SHOW_REGISTERING:
+            show_message("Registering");
+            break;
+        }
     }
 }
 
-void init_i2c_master(void)
+void show_message(const char* msg) {
+    i2c_lcd1602_clear(lcd_info);
+    i2c_lcd1602_move_cursor(lcd_info, 0, 0);
+
+    i2c_lcd1602_write_string(lcd_info, msg);
+}
+
+static void init_i2c_master(void)
 {
     int i2c_master_port = I2C_MASTER_NUM;
     i2c_config_t conf;
