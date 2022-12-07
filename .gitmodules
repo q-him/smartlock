@@ -4,3 +4,6 @@
 [submodule "components/esp32-i2c-lcd1602"]
 	path = components/esp32-i2c-lcd1602
 	url = https://github.com/DavidAntliff/esp32-i2c-lcd1602
+[submodule "components/esp-idf-rc522"]
+	path = components/esp-idf-rc522
+	url = https://github.com/abobija/esp-idf-rc522
