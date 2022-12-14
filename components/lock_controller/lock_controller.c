@@ -27,8 +27,10 @@ void start_lock_controller() {
 
 void lock_controller_task(void *params)
 {
-    
     ESP_LOGI(LKC_TAG, "started");
+
+    LcdMessage_t lcd_message = LCD_SHOW_OPEN;
+    xQueueSend(lcd_queue, &lcd_message, portMAX_DELAY);
 
     load_keys();
     
@@ -69,10 +71,15 @@ void load_keys() {
 void open_lock(uint64_t key) {
     if (!contains_key(key)) {
         ESP_LOGE(LKC_TAG, "cannot open lock: incorrect key %llu", key);
+        LcdMessage_t message = LCD_SHOW_ERROR;
+        xQueueSend(lcd_queue, &message, portMAX_DELAY);
+        return;
     }
 
     ESP_LOGI(LKC_TAG, "opened the lock with key %llu", key);
     is_open = true;
+    LcdMessage_t message = LCD_SHOW_OPEN;
+    xQueueSend(lcd_queue, &message, portMAX_DELAY);
 }
 
 bool contains_key(uint64_t key) {
@@ -88,6 +95,8 @@ bool contains_key(uint64_t key) {
 void close_lock() {
     ESP_LOGI("LKC_TAG", "closed the lock");
     is_open = false;
+    LcdMessage_t message = LCD_SHOW_CLOSED;
+    xQueueSend(lcd_queue, &message, portMAX_DELAY);
 }
 
 void register_key(uint64_t key) {

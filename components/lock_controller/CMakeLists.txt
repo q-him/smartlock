@@ -1,2 +1,3 @@
 idf_component_register(SRCS "lock_controller.c"
-                    INCLUDE_DIRS "include")
+                    INCLUDE_DIRS "include"
+                    REQUIRES lcd)

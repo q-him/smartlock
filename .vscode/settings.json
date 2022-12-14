@@ -20,6 +20,7 @@
         "fstream": "c",
         "lcd.h": "c",
         "queue.h": "c",
-        "freertos.h": "c"
+        "freertos.h": "c",
+        "task.h": "c"
     }
 }

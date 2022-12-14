@@ -7,6 +7,7 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "sdkconfig.h"
+#include "lcd.h"
 
 #define KEYS_SIZE CONFIG_KEY_STORAGE_SIZE
 
