@@ -1,0 +1,183 @@
+<!DOCTYPE HTML><html><head>
+    <title>Панель управления умным замком</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <script>
+      current_status = false;
+      window.onload = check_status();
+  
+      function check_status() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/get_status", false);
+        xhr.send()
+        next_status = (xhr.responseText === "true");
+        if (current_status !== next_status) {
+          current_status = next_status
+          if (current_status === true) {
+            setTimeout(open_locker, 100);
+            //open_locker()
+          }
+          else {
+            setTimeout(close_locker, 100);
+            //close_locker()
+          }
+        }
+
+        xhr.open("POST", "/stop_register", false);
+        xhr.send()
+
+        xhr.open("POST", "/stop_delete", false);
+        xhr.send()
+      }
+      
+
+      function check_password() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/check_password", false);
+        xhr.send(document.getElementById('input_password').value);
+        admin_status = xhr.responseText;
+        return (admin_status === "true")
+      }
+
+  
+      function open_locker_post() {
+        if (check_password()) {
+          current_status = true;
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/open_locker", false);
+          xhr.send()
+          open_locker()
+        } else {
+          alert("Пароль введен неверно.");
+        }
+      }
+  
+      function close_locker_post() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/close_locker", false);
+        xhr.send()
+        current_status = false;
+        close_locker()
+      }
+  
+      function open_locker() {
+        document.getElementById("div_header").style.backgroundColor = "lightgreen";
+        document.getElementById("p_status").textContent = "Замок разблокирован";
+        document.getElementById("p_open_text").hidden = true;
+        document.getElementById("input_password").hidden = true;
+        document.getElementById("check_password_button").hidden = true;
+        document.getElementById("close_button").hidden = false;
+      }
+  
+      function close_locker() {
+        document.getElementById("div_header").style.backgroundColor = "lightcoral";
+        document.getElementById("p_status").textContent = "Замок заблокирован";
+        document.getElementById("p_open_text").hidden = false;
+        document.getElementById("input_password").hidden = false;
+        document.getElementById("check_password_button").hidden = false;
+        document.getElementById("close_button").hidden = true;
+      }
+  
+      function start_register() {
+        if (check_password()) {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/start_register", false);
+          xhr.send()
+          document.getElementById("input_password").hidden = true;
+          document.getElementById("close_button").hidden = true;
+          document.getElementById("p_open_text").hidden = true;
+          document.getElementById("p_register_text").hidden = false;
+          document.getElementById("start_register_button").hidden = true;
+          document.getElementById("start_delete_button").hidden = true;
+          document.getElementById("check_password_button").hidden = true;
+          document.getElementById("stop_register").hidden = false;
+        } else {
+          alert("Пароль введен неверно.");
+        }
+      }
+  
+      function start_delete() {
+        if (check_password()) {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/start_delete", false);
+          xhr.send()
+          document.getElementById("input_password").hidden = true;
+          document.getElementById("close_button").hidden = true;
+          document.getElementById("p_open_text").hidden = true;
+          document.getElementById("p_delete_text").hidden = false;
+          document.getElementById("start_register_button").hidden = true;
+          document.getElementById("start_delete_button").hidden = true;
+          document.getElementById("check_password_button").hidden = true;
+          document.getElementById("stop_delete").hidden = false;
+        } else {
+          alert("Пароль введен неверно.");
+        }
+      }
+  
+      function stop_register() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/stop_register", false);
+        xhr.send()
+        document.getElementById("p_register_text").hidden = true;
+        document.getElementById("stop_register").hidden = true;
+        back_to_main()
+      }
+  
+      function stop_delete() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/stop_delete", false);
+        xhr.send()
+        document.getElementById("p_delete_text").hidden = true;
+        document.getElementById("stop_delete").hidden = true;
+        back_to_main()
+      }
+  
+      function back_to_main() {
+        if (current_status === false) {
+          document.getElementById("input_password").hidden = false;
+          document.getElementById("p_open_text").hidden = false;
+          document.getElementById("check_password_button").hidden = false;
+        }
+        else {
+          document.getElementById("close_button").hidden = false;
+        }
+  
+        document.getElementById("start_register_button").hidden = false;
+        document.getElementById("start_delete_button").hidden = false;
+  
+  
+      }
+    </script>
+  </head>
+  <body>
+    <div id="div_header" style="text-align: center; background-color: lightcoral; padding: 1em; margin: -2em;">
+      <p id="p_status" style="font-family: 'Lucida Grande', sans-serif; font-size: 2em">Замок заблокирован</p>
+    </div>
+    <br><br>
+    <div style="text-align: center">
+      <p id="p_open_text" style="font-family: 'Verdana', sans-serif; font-size: 2em">Введите мастер-код для администрирования замка.</p>
+      <p id="p_register_text" hidden="hidden" style="font-family: 'Verdana', sans-serif; font-size: 2em">Приложите карту или палец для регистрации.</p>
+      <p id="p_delete_text" hidden="hidden" style="font-family: 'Verdana', sans-serif; font-size: 2em">Приложите карту или палец для удаления.</p>
+      <input id="input_password" type="number" style="width: 80%; font-family: 'Verdana', sans-serif; font-size: 2em;
+            text-align: center; border-color: black">
+      <br>
+      <br>
+      <button id="check_password_button" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="open_locker_post()">Открыть</button>
+      <br>
+      <button id="close_button" hidden="hidden" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="close_locker_post()">Закрыть</button>
+      <br>
+      <button id="start_register_button" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="start_register()">Зарегистрировать</button>
+      <br>
+      <button id="stop_register" hidden="hidden" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="stop_register()">На главную</button>
+      <br>
+      <button id="start_delete_button" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="start_delete()">Удалить</button>
+  
+      <button id="stop_delete" hidden="hidden" style="width: 100%; font-family: 'Verdana', sans-serif; font-size: 2em;
+             padding: 0.5em" onclick="stop_delete()">На главную</button>
+    </div>
+  </body>
+  </html>
