@@ -4,6 +4,7 @@ QueueHandle_t lkc_input = NULL;
 
 static uint64_t keys[KEYS_SIZE] = {0};
 static bool is_open = false;
+static LkcReaderMode_t reader_mode = LKC_READER_OPEN;
 
 void lock_controller_task(void *params);
 void load_keys();
@@ -12,6 +13,7 @@ bool contains_key(uint64_t key);
 void close_lock();
 void register_key(uint64_t key);
 void unregister_key(uint64_t key);
+void change_reader_mode();
 
 void start_lock_controller() {
     lkc_input = xQueueCreate(16, sizeof(LkcMsg_t));
@@ -38,7 +40,6 @@ void lock_controller_task(void *params)
 
     while (true) {
         xQueueReceive(lkc_input, (void*)(&message), portMAX_DELAY);
-        ESP_LOGI(LKC_TAG, "message received");
 
         switch (message.id) {
             case LKC_OPEN:
@@ -52,6 +53,9 @@ void lock_controller_task(void *params)
                 break;
             case LKC_UNREGISTER:
                 unregister_key(message.data);
+                break;
+            case LKC_READER_MODE:
+                change_reader_mode();
                 break;
             default:
                 ESP_LOGI(LKC_TAG, "UNKNOWN %llu", message.data);
@@ -69,6 +73,14 @@ void load_keys() {
 }
 
 void open_lock(uint64_t key) {
+    if (reader_mode == LKC_READER_REGISTER) {
+        register_key(key);
+        return;
+    } else if (reader_mode == LKC_READER_UNREGISTER) {
+        unregister_key(key);
+        return;
+    }
+
     if (!contains_key(key)) {
         ESP_LOGE(LKC_TAG, "cannot open lock: incorrect key %llu", key);
         LcdMessage_t message = LCD_SHOW_ERROR;
@@ -83,6 +95,10 @@ void open_lock(uint64_t key) {
 }
 
 bool contains_key(uint64_t key) {
+    if (key == 0) {
+        return false;
+    }
+
     for (size_t i = 0; i < KEYS_SIZE; i++) {
         if (key == keys[i]) {
             return true;
@@ -130,4 +146,17 @@ void unregister_key(uint64_t key) {
     }
 
     ESP_LOGW(LKC_TAG, "cannot unregister key %llu: no such key in storage", key);
+}
+
+void change_reader_mode() {
+    if (reader_mode == LKC_READER_OPEN) {
+        ESP_LOGI(LKC_TAG, "register mode");
+        reader_mode = LKC_READER_REGISTER;
+    } else if (reader_mode == LKC_READER_REGISTER) {
+        ESP_LOGI(LKC_TAG, "unregister mode");
+        reader_mode = LKC_READER_UNREGISTER;
+    } else {
+        ESP_LOGI(LKC_TAG, "open mode");
+        reader_mode = LKC_READER_OPEN;
+    }
 }

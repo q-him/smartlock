@@ -21,6 +21,8 @@
         "lcd.h": "c",
         "queue.h": "c",
         "freertos.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "sys.h": "c",
+        "inputs.h": "c"
     }
 }

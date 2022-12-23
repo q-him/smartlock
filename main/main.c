@@ -8,6 +8,7 @@
 #include "lock_controller.h"
 #include "lcd.h"
 #include "rfid.h"
+#include "inputs.h"
 
 static const char* TAG = "main";
 
@@ -18,6 +19,7 @@ void app_main(void)
     start_lock_controller();
     start_lcd_task();
     start_rfid_task();
+    start_inputs_task();
 
     // while (true) {
     //     LkcDataId_t id = i % 4;

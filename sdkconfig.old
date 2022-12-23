@@ -133,18 +133,34 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Digital inputs configuration
+#
+CONFIG_CLOSE_DETECTOR_PIN=15
+CONFIG_REGISTER_BUTTON_PIN=32
+# end of Digital inputs configuration
+
+#
+# LCD configuration
+#
+CONFIG_I2C_SDA_PIN=14
+CONFIG_I2C_SCL_PIN=27
+CONFIG_LCD_I2C_ADDR=0x3F
+# end of LCD configuration
+
+#
 # Smartlock configuration
 #
 CONFIG_KEY_STORAGE_SIZE=128
 # end of Smartlock configuration
 
 #
-# LCD configuration
+# RFID configuration
 #
-CONFIG_I2C_SDA_PIN=18
-CONFIG_I2C_SCL_PIN=19
-CONFIG_LCD_I2C_ADDR=0x3F
-# end of LCD configuration
+CONFIG_SPI_MOSI_PIN=19
+CONFIG_SPI_MISO_PIN=21
+CONFIG_SPI_SDA_PIN=5
+CONFIG_SPI_SCK_PIN=18
+# end of RFID configuration
 
 #
 # Compiler options

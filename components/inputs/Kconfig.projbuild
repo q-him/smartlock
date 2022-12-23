@@ -1,0 +1,10 @@
+menu "Digital inputs configuration"
+    config CLOSE_DETECTOR_PIN
+        int "Close detector pin"
+        range 0 33
+        default 33
+    config REGISTER_BUTTON_PIN
+        int "Register button pin"
+        range 0 33
+        default 32
+endmenu

@@ -133,6 +133,13 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
+# Digital inputs configuration
+#
+CONFIG_CLOSE_DETECTOR_PIN=33
+CONFIG_REGISTER_BUTTON_PIN=32
+# end of Digital inputs configuration
+
+#
 # LCD configuration
 #
 CONFIG_I2C_SDA_PIN=14

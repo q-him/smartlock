@@ -16,8 +16,15 @@ typedef enum
     LKC_OPEN,
     LKC_CLOSE,
     LKC_REGISTER,
-    LKC_UNREGISTER
+    LKC_UNREGISTER,
+    LKC_READER_MODE
 } LkcDataId_t;
+
+typedef enum {
+    LKC_READER_OPEN,
+    LKC_READER_REGISTER,
+    LKC_READER_UNREGISTER
+} LkcReaderMode_t;
 
 typedef struct
 {
