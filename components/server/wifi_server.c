@@ -1,11 +1,15 @@
+#include "include/wifi_server.h"
+
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include "esp_mac.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
+#include "lock_controller.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -14,13 +18,13 @@
 
 #define ESP_WIFI_SSID      "Smartlock Access Point"
 #define ESP_WIFI_PASS      "smartlock"
-#define ESP_WIFI_CHANNEL   0
+#define ESP_WIFI_CHANNEL   6
 #define MAX_STA_CONN       10
 
 static const char *TAG = "wifi softAP";
 static const char *WIFITASKTAG = "wifi task";
 const char master_password[100] = "1111";    // мастер-пароль (только цифры)
-bool is_locker_open = false;                 // статус замка
+// bool is_lock_open = false;                 // статус замка
 
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
@@ -63,6 +67,7 @@ void wifi_init_softap(void)
         },
     };
 
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
@@ -103,7 +108,7 @@ esp_err_t post_check_password_handler(httpd_req_t *req)
 // и скрытия панели ввода пароля
 esp_err_t post_get_status(httpd_req_t *req)
 {
-    if (is_locker_open)
+    if (is_lock_open)
       httpd_resp_send(req, "true", HTTPD_RESP_USE_STRLEN);
     else
       httpd_resp_send(req, "false", HTTPD_RESP_USE_STRLEN);
@@ -113,9 +118,11 @@ esp_err_t post_get_status(httpd_req_t *req)
 // Обработка события при нажатии на кнопку "Зарегистрировать"
 esp_err_t post_start_register(httpd_req_t *req)
 {
-
-
-
+    LkcMsg_t msg = {
+        .id = LKC_READER_MODE,
+        .data = LKC_READER_REGISTER
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
 
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Started register");
@@ -125,9 +132,11 @@ esp_err_t post_start_register(httpd_req_t *req)
 // Обработка события при нажатии на кнопку возврата из режима регистрации
 esp_err_t post_stop_register(httpd_req_t *req)
 {
-    
-
-
+    LkcMsg_t msg = {
+        .id = LKC_READER_MODE,
+        .data = LKC_READER_OPEN
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
 
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Stopped register");
@@ -137,9 +146,11 @@ esp_err_t post_stop_register(httpd_req_t *req)
 // Обработка события при нажатии на кнопку "Удалить"
 esp_err_t post_start_delete(httpd_req_t *req)
 {
-    
-
-
+    LkcMsg_t msg = {
+        .id = LKC_READER_MODE,
+        .data = LKC_READER_UNREGISTER
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
 
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Started delete");
@@ -149,9 +160,11 @@ esp_err_t post_start_delete(httpd_req_t *req)
 // Обработка события при нажатии на кнопку возврата из режима удаления
 esp_err_t post_stop_delete(httpd_req_t *req)
 {
-    
-
-
+    LkcMsg_t msg = {
+        .id = LKC_READER_MODE,
+        .data = LKC_READER_OPEN
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
 
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Stopped delete");
@@ -161,11 +174,12 @@ esp_err_t post_stop_delete(httpd_req_t *req)
 // Обработка открытия замка
 esp_err_t post_open_locker(httpd_req_t *req)
 {
-    is_locker_open = true;
+    LkcMsg_t msg = {
+        .id = LKC_OPEN,
+        .data = 0
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
     
-
-
-
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Locker is open now");
     return ESP_OK;
@@ -174,10 +188,10 @@ esp_err_t post_open_locker(httpd_req_t *req)
 // Обработка открытия замка
 esp_err_t post_close_locker(httpd_req_t *req)
 {
-    is_locker_open = false;
-
-
-
+    LkcMsg_t msg = {
+        .id = LKC_CLOSE
+    };
+    xQueueSend(lkc_input, &msg, portMAX_DELAY);
 
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
     ESP_LOGI(TAG, "Locker is close now");
@@ -267,19 +281,12 @@ httpd_handle_t start_webserver(void)
 }
 
 void wifi_server_task(void *params) {
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
     ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
     wifi_init_softap();
     start_webserver();
     
     while(1) {
-
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 

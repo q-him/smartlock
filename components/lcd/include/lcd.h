@@ -26,10 +26,13 @@
 #define I2C_MASTER_SCL_IO        CONFIG_I2C_SCL_PIN
 
 typedef enum {
+    LCD_SHOW_UNKNOWN,
     LCD_SHOW_OPEN,
     LCD_SHOW_CLOSED,
     LCD_SHOW_ERROR,
-    LCD_SHOW_REGISTERING
+    LCD_SHOW_REGISTERING,
+    LCD_SHOW_OK,
+    LCD_SHOW_UNREGISTERING
 } LcdMessage_t;
 
 extern QueueHandle_t lcd_queue;

@@ -9,7 +9,7 @@ void inputs_task(void *params) {
         bool current_level = gpio_get_level(CONFIG_CLOSE_DETECTOR_PIN);
         if (!door_last_level && current_level) {
             LkcMsg_t message = {
-                .id = LKC_CLOSE,
+                .id = LKC_CLOSE
             };
             xQueueSend(lkc_input, &message, portMAX_DELAY);
         }
@@ -20,6 +20,7 @@ void inputs_task(void *params) {
         if (!register_last_level && current_level) {
             LkcMsg_t message = {
                 .id = LKC_READER_MODE,
+                .data = LKC_READER_MODE_NEXT
             };
             xQueueSend(lkc_input, &message, portMAX_DELAY);
         }

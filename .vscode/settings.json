@@ -23,6 +23,10 @@
         "freertos.h": "c",
         "task.h": "c",
         "sys.h": "c",
-        "inputs.h": "c"
+        "inputs.h": "c",
+        "servo_lock.h": "c",
+        "mcpwm.h": "c",
+        "esp_mac.h": "c",
+        "thread": "c"
     }
 }

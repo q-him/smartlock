@@ -11,7 +11,7 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
                 rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
                 ESP_LOGI(RFID_TAG, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
                 LkcMsg_t message = {
-                    .id = LKC_OPEN,
+                    .id = LKC_KEY,
                     .data = tag->serial_number
                 };
                 xQueueSend(lkc_input, &message, portMAX_DELAY);

@@ -1,0 +1,21 @@
+menu "Servo lock configuration"
+    config SERVO_PIN
+        int "Servomotor pin"
+        range 0 34
+        default 32
+        
+    config SERVO_MIN_PULSEWIDTH_US
+        int "Servo minimal pulse width"
+        range 0 5000
+        default 1000
+    
+    config SERVO_MAX_PULSEWIDTH_US
+        int "Servo maximal pulse width"
+        range 0 5000
+        default 2000
+    
+    config SERVO_FREQUENCY
+        int "Servo operation frequency"
+        range 1 100
+        default 50
+endmenu

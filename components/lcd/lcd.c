@@ -7,9 +7,6 @@ static i2c_lcd1602_info_t* lcd_info;
 static void lcd_task(void* param);
 static void init_i2c_master();
 static void show_message();
-static void show_open();
-static void show_closed();
-static void show_error();
 
 void start_lcd_task()
 {
@@ -51,18 +48,27 @@ static void lcd_task(void* param)
 
         switch (message)
         {
-        case LCD_SHOW_OPEN:
-            show_message("Open");
-            break;
-        case LCD_SHOW_CLOSED:
-            show_message("Closed");
-            break;
-        case LCD_SHOW_ERROR:
-            show_message("Error");
-            break;
-        case LCD_SHOW_REGISTERING:
-            show_message("Registering");
-            break;
+            case LCD_SHOW_UNKNOWN:
+                show_message("????");
+                break;
+            case LCD_SHOW_OPEN:
+                show_message("Open");
+                break;
+            case LCD_SHOW_CLOSED:
+                show_message("Closed");
+                break;
+            case LCD_SHOW_ERROR:
+                show_message("Error");
+                break;
+            case LCD_SHOW_REGISTERING:
+                show_message("Registering");
+                break;
+            case LCD_SHOW_UNREGISTERING:
+                show_message("Unregistering");
+                break;
+            case LCD_SHOW_OK:
+                show_message("Ok");
+                break;
         }
     }
 }

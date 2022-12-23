@@ -7,12 +7,16 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "sdkconfig.h"
+#include "servo_lock.h"
 #include "lcd.h"
+#include "nvs.h"
+#include "nvs_flash.h"
 
 #define KEYS_SIZE CONFIG_KEY_STORAGE_SIZE
 
 typedef enum
 {
+    LKC_KEY,
     LKC_OPEN,
     LKC_CLOSE,
     LKC_REGISTER,
@@ -21,6 +25,7 @@ typedef enum
 } LkcDataId_t;
 
 typedef enum {
+    LKC_READER_MODE_NEXT,
     LKC_READER_OPEN,
     LKC_READER_REGISTER,
     LKC_READER_UNREGISTER
@@ -38,6 +43,7 @@ typedef struct
 } LkcParams_t;
 
 extern QueueHandle_t lkc_input;
+extern bool is_lock_open;
 static const char* LKC_TAG = "lock_controller";
 
 void start_lock_controller();

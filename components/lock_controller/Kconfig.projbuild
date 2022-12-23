@@ -2,7 +2,13 @@ menu "Smartlock configuration"
     config KEY_STORAGE_SIZE
         int "Key storage size"
         range 0 1000
-        default 128
+        default 16
         help
             Maximum amount of unlock keys stored in memory
+    config MESSAGE_DELAY_MS
+        int "Message delay (in ms)"
+        range 0 5000
+        default 1000
+        help
+            A period of time when message is shown and thread is paused
 endmenu
