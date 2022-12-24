@@ -211,7 +211,7 @@ void unregister_key(uint64_t key) {
 
 void change_reader_mode(LkcReaderMode_t new_mode) {
     if (new_mode == LKC_READER_MODE_NEXT) {
-        if (reader_mode == LKC_READER_OPEN) {
+        if (reader_mode == LKC_READER_OPEN && is_lock_open) {
             reader_mode = LKC_READER_REGISTER;
         } else if (reader_mode == LKC_READER_REGISTER) {
             reader_mode = LKC_READER_UNREGISTER;
